@@ -1,0 +1,42 @@
+Resources:
+  myEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-051ed863837a0b1b6
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref iamInstanceProfile
+      Tags:
+        - Key: Name
+          Value: SSM-Test-Instance
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref myEC2Instance
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore 
+  iamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: AllowSSM
+      Path: /
+      Roles:
+        - Ref: iamRole
+
+Outputs:
+  myEC2Instance:
+    Description: Instance Id 
+    Value: !Ref myEC2Instance
